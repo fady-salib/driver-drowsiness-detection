@@ -1,0 +1,15 @@
+names:
+- closed_eye
+- closed_mouth
+- open_eye
+- open_mouth
+nc: 4
+roboflow:
+  license: CC BY 4.0
+  project: tired-detect
+  url: https://universe.roboflow.com/smoke-tcfs5/tired-detect/dataset/3
+  version: 3
+  workspace: smoke-tcfs5
+test: ../test/images
+train: ../train/images
+val: ../valid/images

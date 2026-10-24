@@ -1,0 +1,25 @@
+# Dataset images/labels (third-party, CC BY 4.0 — download separately, see data/README.md)
+data/*/train/
+data/*/valid/
+data/*/test/
+data/*/*.cache
+*.cache
+
+# Local training/prediction output and videos
+runs/
+*.avi
+*.mp4
+
+# Weights: only the shipped model is tracked
+*.pt
+!models/best_2.pt
+
+# Personal photos / captured frames
+samples/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
+.DS_Store

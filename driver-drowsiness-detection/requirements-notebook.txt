@@ -1,0 +1,7 @@
+# notebooks/lane_segmentation_fcn.ipynb  (use Python 3.10 or 3.11 for TensorFlow)
+-r requirements.txt
+tensorflow
+matplotlib
+pandas
+tqdm
+jupyter

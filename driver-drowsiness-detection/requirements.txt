@@ -1,0 +1,8 @@
+# Main application (src/driver_assist.py) and experiments
+ultralytics
+opencv-python
+numpy
+
+# Raspberry Pi only — GPIO control of buzzer / LED / motor relay / servo / RPM sensor.
+# Without it the app still runs and simulates the hardware outputs.
+RPi.GPIO; platform_system == "Linux" and (platform_machine == "armv7l" or platform_machine == "aarch64")

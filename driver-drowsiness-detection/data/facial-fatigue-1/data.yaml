@@ -1,0 +1,14 @@
+names:
+- drowsy
+- awake
+
+nc: 2
+roboflow:
+  license: CC BY 4.0
+  project: facial-fatigue
+  url: https://universe.roboflow.com/local-project/facial-fatigue/dataset/1
+  version: 1
+  workspace: local-project
+test: ../test/images
+train: ../train/images
+val: ../valid/images
