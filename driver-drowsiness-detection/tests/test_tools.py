@@ -2,6 +2,7 @@ import importlib.util
 import os
 import tempfile
 import unittest
+from unittest import mock
 
 import cv2
 import numpy as np
@@ -22,6 +23,16 @@ class CalibrateRoad(unittest.TestCase):
     def test_parse_roi_rejects_wrong_point_count(self):
         with self.assertRaises(ValueError):
             tool.parse_roi("1,2 3,4 5,6")
+
+    def test_parse_roi_rejects_degenerate_and_out_of_bounds(self):
+        for text in ("1,1 1,1 2,2 3,3", "0,0 1300,0 1200,700 0,700"):
+            with self.assertRaises(ValueError):
+                tool.parse_roi(text)
+
+    def test_failed_output_write_is_reported(self):
+        with mock.patch.object(cv2, "imread", return_value=fakes.yellow_road()), mock.patch.object(cv2, "imwrite", return_value=False):
+            with self.assertRaises(SystemExit):
+                tool.main(["--image", "input.png", "--out", "output.png"])
 
     def test_render_keeps_frame_size_and_marks_the_roi(self):
         frame = np.zeros((480, 640, 3), np.uint8)                      # any input size is resized to 1280x720

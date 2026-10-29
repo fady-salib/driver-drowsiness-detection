@@ -10,6 +10,6 @@ roboflow:
   url: https://universe.roboflow.com/smoke-tcfs5/tired-detect/dataset/3
   version: 3
   workspace: smoke-tcfs5
-test: ../test/images
-train: ../train/images
-val: ../valid/images
+test: test/images
+train: train/images
+val: valid/images

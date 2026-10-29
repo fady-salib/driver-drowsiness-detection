@@ -9,6 +9,6 @@ roboflow:
   url: https://universe.roboflow.com/local-project/facial-fatigue/dataset/1
   version: 1
   workspace: local-project
-test: ../test/images
-train: ../train/images
-val: ../valid/images
+test: test/images
+train: train/images
+val: valid/images

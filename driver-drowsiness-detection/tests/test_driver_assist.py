@@ -76,7 +76,7 @@ class Curvature(unittest.TestCase):
 
     def test_estimate_distance(self):
         self.assertAlmostEqual(self.ns["estimate_distance"](126, 80), 10.0)
-        self.assertEqual(self.ns["estimate_distance"](0, 0), 0.0)
+        self.assertEqual(self.ns["estimate_distance"](0, 0), float("inf"))
 
 
 class LanePipeline(unittest.TestCase):
@@ -140,8 +140,8 @@ class ServoSetupRegression(unittest.TestCase):
     def test_without_servo_setup_the_hardware_is_silently_disabled(self):
         """Documents the original bug: GPIO.PWM() before GPIO.setup() raised and disabled all GPIO control."""
         r = run_app(patch_source=lambda s: s.replace("    GPIO.setup(SERVO_PWM_PIN, GPIO.OUT)", "    pass"))
-        self.assertFalse(r.ns["GPIO_AVAILABLE"])
-        self.assertEqual([e for e in r.events if e.kind == "out"], [])
+        self.assertIsInstance(r.error, RuntimeError)
+        self.assertEqual(values(r.events, "out", MOTOR)[-1], 0)
 
     def test_with_servo_setup_it_works(self):
         self.assertTrue(run_app(n_frames=10).ns["GPIO_AVAILABLE"])
@@ -174,8 +174,8 @@ class FailSafe(unittest.TestCase):
     def test_crash_then_safe_shutdown(self):
         r = run_app(crash_at=25)
         self.assertIsInstance(r.error, RuntimeError)
-        self.assertEqual(values(r.events, "out", MOTOR)[-1], 1)         # motor was still running at the crash
-        self.assertEqual(values(r.events, "out", BUZZER)[-1], 1)
+        self.assertEqual(values(r.events, "out", MOTOR)[-1], 0)         # finally shuts down immediately
+        self.assertEqual(values(r.events, "out", BUZZER)[-1], 0)
         shutdown = r.hooks["atexit"][0]
         shutdown()                                                      # what the interpreter does at exit
         self.assertEqual(values(r.events, "out", MOTOR)[-1], 0)

@@ -15,6 +15,11 @@ URL below into `data/<name>/` (so you have `train/`, `valid/`, `test/` next to `
 `drowsinessyolov8-1` (v1 of the second project) was used by the first training run but was not in the archive.
 No `args.yaml` references `tired-detect-3`, so it is not known which run (if any) used it.
 
-> ⚠️ **Class order differs between datasets.** `src/driver_assist.py` assumes `awake = 0`, `drowsy = 1`, which is
-> what the shipped `models/best_2.pt` was trained with (the class names are stored inside the file). A model
-> trained on `facial-fatigue-1` has the opposite order and would have its alerts inverted unless the IDs are swapped.
+Class order differs across datasets. The main application resolves IDs from model
+names and rejects models without both awake/drowsy labels; it does not hard-code
+the dataset order. The four-class eye/mouth dataset is not directly compatible.
+
+Split paths in these YAML files refer to `train/images`, `valid/images` and
+`test/images` next to each YAML. Export there and pass the YAML's absolute path to
+training. Images and their split assignments were not available in this review;
+metadata cannot verify subject separation or augmentation/near-duplicate leakage.

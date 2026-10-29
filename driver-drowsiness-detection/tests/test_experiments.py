@@ -62,7 +62,7 @@ class FlagDemo(unittest.TestCase):
         frames = [[0], [0], [1], [1], [0], []]
         mod, calls, patches = load("drowsiness_flag_demo.py", frames)
         out = run_main(mod, patches)
-        self.assertEqual(out.count("drowsiness_flag"), 3)          # awake -> drowsy -> awake (no box = awake)
+        self.assertEqual(out.count("drowsiness_flag"), 4)          # awake -> drowsy -> awake (no box = awake)
         self.assertIn("DROWSY", out)
         self.assertEqual(calls["destroyed"], 1)
 

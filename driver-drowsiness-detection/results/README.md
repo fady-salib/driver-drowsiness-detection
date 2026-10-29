@@ -21,4 +21,4 @@ datasets, so the numbers are not comparable across rows.
 Notes
 - Folder names are as they appeared in the original archive. The `name:` / `save_dir:` fields inside `args.yaml` reflect run numbering on the original machine and do not always match the folder name (e.g. `train5` was saved as `train14`).
 - `train7` stopped after 9 epochs and produced no plots.
-- The model shipped in `models/best_2.pt` is the `best_2.pt` checkpoint written by `train5`.
+- The shipped checkpoint records `train14` and the generic `data.yaml`, consistent with the `train5` configuration. Its selected-checkpoint metrics differ from this final-epoch table; see `../docs/model-card.md`. Missing earlier weights and dataset identity prevent full training reproduction.

@@ -87,7 +87,8 @@ def make_gpio(events, state):
 
 def run_app(*, drowsy_from=5, drowsy_until=10 ** 9, n_frames=140, dt=0.25, car_box=None, argv=None,
             patch_source=None, stub_lane=False, crash_at=None, names=None, road_image=None,
-            install_gpio=True, run_name="__main__"):
+            install_gpio=True, run_name="__main__", allow_model_actuation=True, driver_boxes=None, car_from=0,
+            inference_delay=0.0):
     """Run src/driver_assist.py end-to-end against fakes. Returns Result(ns, events, out, error, caps, hooks)."""
     names = names or {0: "awake", 1: "drowsy"}
     drowsy_id = [i for i, n in names.items() if n == "drowsy"]
@@ -115,11 +116,14 @@ def run_app(*, drowsy_from=5, drowsy_until=10 ** 9, n_frames=140, dt=0.25, car_b
 
         def __call__(self, frame, verbose=False):
             if self.is_car_model:
-                return [Res([Box(0, car_box)] if car_box else [], frame)]
+                return [Res([Box(0, car_box)] if car_box and state["frame"] >= car_from else [], frame)]
+            state["t"] += inference_delay
             if crash_at is not None and state["frame"] >= crash_at:
                 raise RuntimeError("simulated crash inside the model")
             drowsy = drowsy_from <= state["frame"] < drowsy_until
             boxes = [Box(drowsy_id[0])] if (drowsy and drowsy_id) else ([Box(awake_id[0])] if awake_id else [])
+            if driver_boxes is not None:
+                boxes = [Box(*spec) for spec in driver_boxes]
             return [Res(boxes, frame)]
 
     class Cap:
@@ -133,6 +137,7 @@ def run_app(*, drowsy_from=5, drowsy_until=10 ** 9, n_frames=140, dt=0.25, car_b
         def read(self):
             if self.role == 0:
                 state["frame"] += 1
+                state["t"] = 1000.0 + state["frame"] * dt
             if state["frame"] > n_frames:
                 return False, None
             return True, (road_image if road_image is not None else yellow_road()).copy()
@@ -141,7 +146,6 @@ def run_app(*, drowsy_from=5, drowsy_until=10 ** 9, n_frames=140, dt=0.25, car_b
             pass
 
     def fake_time():
-        state["t"] = next(clock)
         return state["t"]
 
     ultralytics = types.ModuleType("ultralytics")
@@ -157,6 +161,8 @@ def run_app(*, drowsy_from=5, drowsy_until=10 ** 9, n_frames=140, dt=0.25, car_b
     if stub_lane:
         assert 'if __name__ == "__main__":' in src
         src = src.replace('if __name__ == "__main__":', STUB_LANE, 1)
+    if allow_model_actuation:
+        src = src.replace("ALLOW_MODEL_ACTUATION = False", "ALLOW_MODEL_ACTUATION = True")
     if patch_source:
         src = patch_source(src)
     tmpdir = tempfile.mkdtemp()
@@ -170,11 +176,11 @@ def run_app(*, drowsy_from=5, drowsy_until=10 ** 9, n_frames=140, dt=0.25, car_b
         for name, value in (("VideoCapture", Cap), ("imshow", lambda *a, **k: None),
                             ("waitKey", lambda *a, **k: -1), ("destroyAllWindows", lambda: None)):
             stack.enter_context(mock.patch.object(cv2, name, value))
-        stack.enter_context(mock.patch.object(time, "time", fake_time))
+        stack.enter_context(mock.patch.object(time, "monotonic", fake_time))
         stack.enter_context(mock.patch.object(time, "sleep", lambda s: None))
         stack.enter_context(mock.patch("atexit.register", lambda fn, *a, **k: hooks["atexit"].append(fn)))
         stack.enter_context(mock.patch("signal.signal", lambda sig, h: hooks["signal"].__setitem__(sig, h)))
-        stack.enter_context(mock.patch.object(sys, "argv", argv or ["driver_assist.py"]))
+        stack.enter_context(mock.patch.object(sys, "argv", ([*(argv or ["driver_assist.py"]), "--enable-gpio"] if install_gpio else (argv or ["driver_assist.py"]))))
         stack.enter_context(contextlib.redirect_stdout(out))
         try:
             ns = runpy.run_path(path, run_name=run_name)

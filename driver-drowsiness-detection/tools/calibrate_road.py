@@ -28,6 +28,11 @@ def parse_roi(text):
         points.append((int(x), int(y)))
     if len(points) != 4:
         raise ValueError(f"--roi needs exactly 4 points (top-left top-right bottom-right bottom-left), got {len(points)}")
+    contour = np.int32(points)
+    if (len(set(points)) != 4 or
+            any(not (0 <= x < FRAME_SIZE[0] and 0 <= y < FRAME_SIZE[1]) for x, y in points) or
+            not cv2.isContourConvex(contour) or cv2.contourArea(contour) < 1):
+        raise ValueError("--roi must be four distinct, convex, ordered points within 1280x720")
     return points
 
 
@@ -55,7 +60,10 @@ def main(argv=None):
     parser.add_argument("--out", help="write the side-by-side result here instead of opening a window")
     args = parser.parse_args(argv)
 
-    roi = parse_roi(args.roi)
+    try:
+        roi = parse_roi(args.roi)
+    except ValueError as exc:
+        parser.error(str(exc))
     if args.image:
         frame = cv2.imread(args.image)
         if frame is None:
@@ -70,7 +78,8 @@ def main(argv=None):
     annotated, warped = render(frame, roi)
     both = np.hstack([cv2.resize(annotated, (640, 360)), cv2.resize(warped, (640, 360))])
     if args.out:
-        cv2.imwrite(args.out, both)
+        if not cv2.imwrite(args.out, both):
+            sys.exit(f"cannot write image: {args.out}")
         print(f"wrote {args.out}")
     else:
         cv2.imshow("road ROI (left) and bird's-eye view (right) - any key closes", both)

@@ -1,4 +1,4 @@
-"""Prints the drowsiness flag the main application uses: 1 = awake, 0 = drowsy (printed when it changes).
+"""Prints the drowsiness flag the main application uses: 1 = awake, 0 = drowsy, None = unknown (printed when it changes).
 
     python experiments/drowsiness_flag_demo.py [--source 0] [--model models/best_2.pt]
 
@@ -31,12 +31,14 @@ def main(argv=None):
 
     model = YOLO(args.model)
     drowsy_id = drowsy_class_id(model.names)
-    last_flag = None
+    awake_ids = {int(i) for i, name in model.names.items() if str(name).strip().lower() == "awake"}
+    last_flag = object()
     for frame_results in model(source=source, show=True, stream=True, verbose=False):
         drowsy = any(int(box.cls[0]) == drowsy_id for box in frame_results.boxes)
-        flag = 0 if drowsy else 1
+        awake = any(int(box.cls[0]) in awake_ids for box in frame_results.boxes)
+        flag = 0 if drowsy else (1 if awake else None)
         if flag != last_flag:
-            print(f"drowsiness_flag = {flag}  ({'DROWSY' if drowsy else 'awake'})")
+            print(f"drowsiness_flag = {flag}  ({'DROWSY' if drowsy else ('awake' if awake else 'unknown')})")
             last_flag = flag
         if cv2.waitKey(1) & 0xFF == ord("q"):      # checked on every frame, not only when a face is detected
             break

@@ -45,3 +45,12 @@ alarm and cuts the motor).
 
 The colour ranges in `driver_assist.py` (`purple_*`, `yellow_*`, `green_*`) match the overlay colours the app draws
 itself, so they do **not** need to be tuned per scene.
+
+## Review constraints
+
+Physical motor/steering actuation is disabled by default. Lane/car decisions are
+visualized and tested against fake pins only. The current-frame check is not a
+validated maneuver planner. The width-based distance assumes a known visible
+vehicle width; occlusion, orientation, bounding-box errors and unseen objects
+invalidate it. Camera buffer age is unknown. Do not interpret an empty right-lane
+flag as proof that a lane is safe.

@@ -1,7 +1,8 @@
-# notebooks/lane_segmentation_fcn.ipynb  (use Python 3.10 or 3.11 for TensorFlow)
--r requirements.txt
-tensorflow
-matplotlib
-pandas
-tqdm
-jupyter
+# Separate environment: Python 3.10 or 3.11; not the application environment.
+tensorflow==2.15.1
+numpy==1.26.4
+opencv-python==4.10.0.84
+matplotlib==3.10.8
+pandas==2.3.3
+tqdm==4.67.1
+jupyter>=1,<2

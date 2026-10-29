@@ -8,6 +8,6 @@ roboflow:
   url: https://universe.roboflow.com/cairo-university-tnmct/drowsiness-detection-gxmok/dataset/5
   version: 5
   workspace: cairo-university-tnmct
-test: ../test/images
-train: ../train/images
-val: ../valid/images
+test: test/images
+train: train/images
+val: valid/images
