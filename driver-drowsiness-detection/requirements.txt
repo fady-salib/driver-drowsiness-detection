@@ -1,0 +1,10 @@
+# Main application (src/driver_assist.py) and experiments
+ultralytics==8.3.39
+opencv-python==4.12.0.88
+numpy==2.2.6
+torch==2.5.1
+torchvision==0.20.1
+
+# Raspberry Pi only — GPIO control of buzzer / LED / motor relay / servo / RPM sensor.
+# Without it the app still runs and simulates the hardware outputs.
+# Physical GPIO is opt-in; install requirements-hardware.txt only on a compatible Pi.
